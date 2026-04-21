@@ -1,16 +1,16 @@
 // ============================================================================
-// AI-Stream-Kit — Exponential Backoff Retry Strategy
+// AI-Stream-Kit — 指数退避重试策略 (Exponential Backoff Retry Strategy)
 // ============================================================================
-// Implements exponential backoff with optional jitter to prevent
-// thundering herd effects during reconnection storms.
+// 该模块主要负责在重新连接期间使用指数退避以及可选的随机偏移量 (jitter)，
+// 此举能有效预防断流产生的大规模断线从而引发的“惊群效应” (Thundering Herd)。
 //
-// Formula: delay = min(baseDelay × 2^attempt + jitter, maxDelay)
+// 计算公式: 延迟 = min(基础延迟 × 2^尝试次数 + 随机抖动, 最大允许延迟)
 // ============================================================================
 
 import type { RetryOptions } from './types.js';
 
 /**
- * Default retry configuration.
+ * 默认使用的预置断线重发配置方案。
  */
 export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
   maxRetries: 5,
@@ -20,7 +20,7 @@ export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
 };
 
 /**
- * Merge user-provided partial options with defaults.
+ * 合并合并用户传递进来的各项重发参数配置到默认预设中。
  */
 export function resolveRetryOptions(
   partial?: Partial<RetryOptions>
@@ -32,26 +32,25 @@ export function resolveRetryOptions(
 }
 
 /**
- * Calculate the delay before the next retry attempt.
+ * 结算下一次重新连接行为前需要静默等待的时间延迟(ms)。
  *
- * Uses exponential backoff: baseDelay × 2^attempt
- * With optional random jitter in the range [0, baseDelay) to spread out
- * reconnection attempts across multiple clients.
+ * 底层默认使用标准的指数量级退避算法: baseDelay × 2^attempt
+ * 当开启 Jitter 时，会增加一段从 [0, baseDelay) 的随机等待时间段以错开连接波峰。
  *
- * @param attempt - Zero-based attempt number (0 = first retry)
- * @param options - Retry configuration
- * @returns Delay in milliseconds
+ * @param attempt - 以 0 开始计数的重试次数（0 代表发生第一次意外后的重试）
+ * @param options - 退避设置项
+ * @returns 最终静悄悄摸鱼耗时的毫秒数
  *
  * @example
  * ```ts
- * // Without jitter (deterministic):
+ * // 关闭随机抖动时 (确定的绝对排队机制):
  * calculateDelay(0, { baseDelay: 1000, maxDelay: 30000, jitter: false })
  * // => 1000ms
  *
  * calculateDelay(1, ...) // => 2000ms
  * calculateDelay(2, ...) // => 4000ms
  * calculateDelay(3, ...) // => 8000ms
- * calculateDelay(10, ...) // => 30000ms (capped)
+ * calculateDelay(10, ...) // => 30000ms (将触碰并且不超出最大上限)
  * ```
  */
 export function calculateDelay(
@@ -66,11 +65,11 @@ export function calculateDelay(
 }
 
 /**
- * Determine whether a retry should be attempted.
+ * 判定当下的尝试情形之下，是否还存在被允许再次重连接的资格。
  *
- * @param attempt - Zero-based current attempt number
- * @param options - Retry configuration
- * @returns Whether retry is allowed
+ * @param attempt - 以 0 开始计算的当前阶段发起了几回冲锋
+ * @param options - 重连的策略配置组合
+ * @returns 是否依然保有复工权限
  */
 export function shouldRetry(
   attempt: number,
@@ -80,13 +79,13 @@ export function shouldRetry(
 }
 
 /**
- * Create a promise that resolves after the calculated backoff delay.
- * Can be cancelled via AbortSignal.
+ * 暴露对外的异步倒数定时拦截器。会占用程序一段时间。
+ * 此中内嵌响应逻辑确保可以通过 `AbortSignal` 主发中断。
  *
- * @param attempt - Zero-based attempt number
- * @param options - Retry configuration
- * @param signal - Optional AbortSignal for cancellation
- * @returns Promise that resolves when the delay has elapsed
+ * @param attempt - 当前计次的尝试量 (0起算)
+ * @param options - 延迟时长计算所需的属性支持
+ * @param signal - 可以可选地传入用以提早中断等待倒计时器的外界信号
+ * @returns 虚无のPromise句柄
  */
 export function waitForRetry(
   attempt: number,

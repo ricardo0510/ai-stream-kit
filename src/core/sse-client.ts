@@ -1,12 +1,12 @@
 // ============================================================================
-// AI-Stream-Kit — High-Reliability SSE Client
+// AI-Stream-Kit — 高可靠性 SSE 客户端 (High-Reliability SSE Client)
 // ============================================================================
-// Features:
-// - Native fetch + ReadableStream (no Axios dependency)
-// - Automatic reconnection with exponential backoff
-// - Last-Event-ID based resumption (断点续传)
-// - AbortController integration for user-initiated cancellation
-// - Event deduplication based on event ID
+// 特性功能:
+// - 纯原生 fetch + ReadableStream 底层驱动 (无需挂载 Axios 依赖)
+// - 自带包含针对网络异常的指数退避重连机制
+// - 基于 Last-Event-ID 的断点续传能力
+// - 与 AbortController 深度集成，能够让用户随时主动暂停请求控制流
+// - 依据流传递分配来的事件 ID，底层自驱完成事件内容去重
 // ============================================================================
 
 import type {
@@ -24,7 +24,7 @@ import {
 } from './retry-strategy.js';
 
 /**
- * Create a new SSE client instance.
+ * 创建并实例化一个新的 SSE 客户端控制器。
  *
  * @example
  * ```ts
@@ -71,7 +71,7 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
   }
 
   /**
-   * Build request headers, including Last-Event-ID for resumption.
+   * 组装并发起请求时所需的头部信息，并从最后一次接收事件提取 Last-Event-ID 进行追溯。
    */
   function buildHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
@@ -88,7 +88,7 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
   }
 
   /**
-   * Initiate a fetch connection and begin reading the stream.
+   * 初始化建立一个 fetch 连接过程并进入流式数据堵塞读取状态。
    */
   async function connect(): Promise<void> {
     if (closed) return;
@@ -179,8 +179,8 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
   }
 
   /**
-   * Read from the ReadableStream using a reader and TextDecoder,
-   * feeding chunks to the SSE parser.
+   * 把 ReadableStream 交付给 TextDecoder 处理字符串，
+   * 进而喂给内置的状态机解析器来拼凑事件块。
    */
   async function readStream(body: ReadableStream<Uint8Array>): Promise<void> {
     const reader = body.getReader();
@@ -235,8 +235,8 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
   }
 
   /**
-   * Handle the end of the stream (server closed the connection).
-   * Attempt reconnection if retries are available.
+   * 当流正常完成且服务器断开连接时触发。
+   * 如果仍有重试的资源剩余额度，将会尝试进入下次重连流程。
    */
   function handleStreamEnd(): void {
     if (closed) return;
@@ -244,7 +244,7 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
   }
 
   /**
-   * Attempt to reconnect with exponential backoff.
+   * 执行具备指数退避属性和容灾能力的网络回连。
    */
   async function handleRetry(): Promise<void> {
     if (closed) return;
@@ -267,7 +267,7 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
   }
 
   /**
-   * Permanently close the connection.
+   * 永久断供掐灭该连接实例。
    */
   function handleClose(): void {
     if (closed) return;
@@ -295,7 +295,7 @@ export function createSSEClient(options: SSEClientOptions): SSEClientInstance {
 }
 
 /**
- * Check if an error is an AbortError.
+ * 检验一个抛错结果是否由于用户主动取消行为（AbortError）所致。
  */
 function isAbortError(error: unknown): boolean {
   if (error instanceof DOMException && error.name === 'AbortError') {

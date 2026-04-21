@@ -1,15 +1,15 @@
 // ============================================================================
-// AI-Stream-Kit — Embedding Web Worker
+// AI-Stream-Kit — 算力池专属工兵子线程 (Embedding Web Worker)
 // ============================================================================
-// Runs Transformers.js inference OFF the main thread to prevent UI blocking.
+// 一脚把负责吃算力的 Transformers.js 推理模块踢出主线程以避免浏览器界面彻底宕机卡死。
 //
-// Communication protocol:
-//   Main → Worker: { type: 'init', model, device } | { type: 'embed', id, texts }
-//   Worker → Main: { type: 'ready' } | { type: 'result', id, embeddings }
-//                  | { type: 'error', id, message } | { type: 'progress', stage, progress }
+// 上下级交流协议频道:
+//   主线程送出 → 此地: { type: 'init', model, device } | { type: 'embed', id, texts }
+//   此地返回给 → 主线程: { type: 'ready' } | { type: 'result', id, embeddings }
+//                 | { type: 'error', id, message } | { type: 'progress', stage, progress }
 //
-// The worker lazy-loads @huggingface/transformers and initializes the pipeline
-// only once. Subsequent embed requests reuse the cached pipeline.
+// 此处的线程程序由于具备动态按需加载懒依赖拉取 @huggingface/transformers 库，
+// 并做到了一生只有一次 Pipeline (转换管线)载入的大缓存复用机制。
 // ============================================================================
 
 import type { WorkerRequest, WorkerResponse } from '../core/types.js';
@@ -20,14 +20,14 @@ type Pipeline = (texts: string[], options?: Record<string, unknown>) => Promise<
 let pipeline: Pipeline | null = null;
 
 /**
- * Post a typed message to the main thread.
+ * 带有类型推断护体的事件广播抛掷函数（往主系统主线程传递信息专用）。
  */
 function postTypedMessage(msg: WorkerResponse): void {
   self.postMessage(msg);
 }
 
 /**
- * Initialize the embedding pipeline.
+ * 执行首启动前的准备工作并引入那庞大的远端计算转换工厂设施体系 Pipeline。
  */
 async function initPipeline(model: string, device: 'webgpu' | 'wasm'): Promise<void> {
   try {
@@ -86,7 +86,7 @@ async function initPipeline(model: string, device: 'webgpu' | 'wasm'): Promise<v
 }
 
 /**
- * Generate embeddings for a batch of texts.
+ * 受主线程所托，利用手里已经装配好的机群体系为指定的批量文本生成出具有特性的嵌入值产物组。
  */
 async function generateEmbeddings(id: string, texts: string[]): Promise<void> {
   if (!pipeline) {
@@ -118,7 +118,7 @@ async function generateEmbeddings(id: string, texts: string[]): Promise<void> {
 }
 
 /**
- * Worker message handler.
+ * 打到子线程域里的专用接线生监听大网口程序。
  */
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const msg = event.data;

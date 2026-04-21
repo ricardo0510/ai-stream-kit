@@ -1,8 +1,8 @@
 // ============================================================================
-// AI-Stream-Kit — Embedding Manager (Main Thread)
+// AI-Stream-Kit — RAG 词向量总控台 (Embedding Manager - Main Thread)
 // ============================================================================
-// Wraps Web Worker communication in a clean Promise-based API.
-// Handles worker lifecycle, request queuing, and error recovery.
+// 包装并托管了与 Web Worker 通信联系的底层机制，把异步消息拉平成规矩的 Promise API 接口。
+// 它全权负责 Worker 的诞生与消亡、队列中排队的请求、以及错误恢复与重发拦截工作。
 // ============================================================================
 
 import type {
@@ -16,7 +16,7 @@ import { VectorStore } from './vector-store.js';
 import { chunkText } from './chunker.js';
 
 /**
- * Promise resolver stored for pending requests.
+ * 用于记录等待被召唤回去的悬空 Promise 对象体。
  */
 interface PendingRequest {
   resolve: (embeddings: number[][]) => void;
@@ -24,8 +24,8 @@ interface PendingRequest {
 }
 
 /**
- * EmbeddingManager orchestrates client-side embedding generation
- * by delegating inference to a Web Worker.
+ * 专设于浏览器主线程的统战管理平台(EmbeddingManager)。
+ * 它是调度向 Web Worker 甩手掌柜外包生成分析词嵌入向量过程的领头羊。
  *
  * @example
  * ```ts
@@ -33,18 +33,18 @@ interface PendingRequest {
  *   model: 'Xenova/all-MiniLM-L6-v2',
  *   device: 'auto',
  *   onProgress: (stage, progress) => {
- *     console.log(`Loading: ${stage} ${(progress * 100).toFixed(0)}%`);
+ *     console.log(`正在加载: ${stage} ${(progress * 100).toFixed(0)}%`);
  *   },
  * });
  *
  * await manager.init();
  *
- * // Process a document
+ * // 一键消化喂给它的整篇散文长文
  * const store = await manager.processDocument(documentText);
  *
- * // Query
- * const results = await manager.retrieve('What is TypeScript?', store, 3);
- * console.log(results[0].entry.text); // Most relevant chunk
+ * // 发起搜索拷问
+ * const results = await manager.retrieve('TypeScript是什么？', store, 3);
+ * console.log(results[0].entry.text); // 最贴题且包含真理的那一段
  *
  * manager.dispose();
  * ```
@@ -65,10 +65,10 @@ export class EmbeddingManager {
   }
 
   /**
-   * Initialize the worker and load the model.
-   * Must be called before any embedding operations.
+   * 初始化建立启动干活的 worker 奴隶并强令其载入庞大的大模型网络。
+   * 此 API 强制且必须先于所有后续计算操作流程进行调用触发。
    *
-   * @throws Error if initialization fails
+   * @throws 当建立模型读取或是分发失败时甩给你 Error 定时炸弹
    */
   async init(): Promise<void> {
     if (this.initialized) return;
@@ -114,10 +114,10 @@ export class EmbeddingManager {
   }
 
   /**
-   * Generate embeddings for an array of texts.
+   * 提供给批量字符串生硬地转换提取为数字特征多维坐标系的转换器。
    *
-   * @param texts - Array of strings to embed
-   * @returns 2D array of embeddings
+   * @param texts - 喂入模型咀嚼的一系列文本切片
+   * @returns 换算后等长的空间坐标矩阵数组
    */
   async embed(texts: string[]): Promise<number[][]> {
     this.assertInitialized();
@@ -137,11 +137,11 @@ export class EmbeddingManager {
   }
 
   /**
-   * Process a document: chunk → embed → store in VectorStore.
+   * 处理消化一篇文稿的完整车间流水线: 原文 → 切割分组 → 送检产码 → 造册收进向量库。
    *
-   * @param text - The full document text
-   * @param chunkOptions - Chunking configuration
-   * @returns A VectorStore containing all embedded chunks
+   * @param text - 又长又臭没有任何排版的原文原句
+   * @param chunkOptions - 你能够微调干涉切碎机的相关设定参数
+   * @returns 包含被整顿收编好特征的知识索引库VectorStore本体
    */
   async processDocument(
     text: string,
@@ -181,12 +181,12 @@ export class EmbeddingManager {
   }
 
   /**
-   * Retrieve the most relevant chunks for a query.
+   * 提着你要找的话柄子，去找馆长(VectorStore)寻觅关系相近的片段。
    *
-   * @param query - The search query text
-   * @param store - The VectorStore to search in
-   * @param topK - Number of results to return (default: 3)
-   * @returns Array of search results with similarity scores
+   * @param query - 要寻人启事的大概意思文字
+   * @param store - 去那座藏书库里进行翻找
+   * @param topK - 选头前几个最有可能中签的句子(默认传回三块)
+   * @returns 富有说服力相似度计分的排列结构数组集
    */
   async retrieve(
     query: string,
@@ -204,14 +204,14 @@ export class EmbeddingManager {
   }
 
   /**
-   * Check if the manager is initialized and ready.
+   * 窥探当前车间和底盘管理人员是否均已就位能接受委托。
    */
   get isReady(): boolean {
     return this.initialized;
   }
 
   /**
-   * Dispose the manager and terminate the worker.
+   * 解散工人包工头并清理现场资源，顺带强制掐断打断那些遥遥无期干不完还没提交回应的任务清单。
    */
   dispose(): void {
     if (this.worker) {
@@ -228,7 +228,7 @@ export class EmbeddingManager {
   }
 
   /**
-   * Handle messages from the worker.
+   * 守站门卫：对接收到返回主干路口的所有由 Web Worker 投递过来的快报包裹做拆分识别与投递处理。
    */
   private handleWorkerMessage(msg: WorkerResponse): void {
     switch (msg.type) {
@@ -267,8 +267,8 @@ export class EmbeddingManager {
   }
 
   /**
-   * Create the Web Worker instance.
-   * Override this method to customize worker creation (e.g., for different bundlers).
+   * 生成配置并创建一个标准的 Web Worker。
+   * 当你需要应付并配合那些恶心的脚手架去改造导入规则时你可以重写重置覆盖这座函数的实现。
    */
   protected createWorker(): Worker {
     // Use a module worker with the embedded worker URL
@@ -280,7 +280,7 @@ export class EmbeddingManager {
   }
 
   /**
-   * Assert that the manager is initialized.
+   * 兜底防君子防不住小人，判断如果越权没加载直接强压就报错抛异常。
    */
   private assertInitialized(): void {
     if (!this.initialized || !this.worker) {

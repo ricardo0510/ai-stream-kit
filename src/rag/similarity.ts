@@ -1,25 +1,24 @@
 // ============================================================================
-// AI-Stream-Kit — Cosine Similarity (Pure Math)
+// AI-Stream-Kit — 余弦相似度 (Cosine Similarity (Pure Math))
 // ============================================================================
-// No external dependencies — pure mathematical implementation of
-// cosine similarity for vector comparison.
+// 该模块不搭载多余的库，仅使用纯数学算法来进行向量间的比对评估。
 //
-// Formula: cos(θ) = (A · B) / (||A|| × ||B||)
+// 公式: cos(θ) = (A · B) / (||A|| × ||B||)
 // ============================================================================
 
 /**
- * Compute the cosine similarity between two vectors.
+ * 计算两个等长浮点方向量之间的余弦相似度。
  *
- * @param a - First vector
- * @param b - Second vector (must be same dimension as `a`)
- * @returns Similarity score in range [-1, 1], where 1 = identical direction
- * @throws Error if vectors have different dimensions or zero length
+ * @param a - 第一个测试向量
+ * @param b - 第二个与之对应的打靶向量
+ * @returns 算出其相似度介于 [-1, 1] 之间。 1代表方向高度重合，0代表风马牛不相及
+ * @throws 维度匹配失败时会触发 Error 保护报错
  *
  * @example
  * ```ts
- * cosineSimilarity([1, 0, 0], [1, 0, 0]); // => 1.0  (identical)
- * cosineSimilarity([1, 0, 0], [0, 1, 0]); // => 0.0  (orthogonal)
- * cosineSimilarity([1, 0, 0], [-1, 0, 0]); // => -1.0 (opposite)
+ * cosineSimilarity([1, 0, 0], [1, 0, 0]); // => 1.0  (一模一样)
+ * cosineSimilarity([1, 0, 0], [0, 1, 0]); // => 0.0  (正交无关)
+ * cosineSimilarity([1, 0, 0], [-1, 0, 0]); // => -1.0 (背道而驰)
  * ```
  */
 export function cosineSimilarity(a: number[], b: number[]): number {
@@ -56,12 +55,12 @@ export function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * Compute the Euclidean distance between two vectors.
- * Useful as an alternative distance metric.
+ * 求得两个空间点坐标的最短直线距离(欧几里得距离)。
+ * 这是在部分场合能取代余弦测算法的一样手段。
  *
- * @param a - First vector
- * @param b - Second vector
- * @returns Distance (0 = identical, larger = more different)
+ * @param a - 出发坐标点
+ * @param b - 目标落脚点
+ * @returns 返回算出的标量距长 (0 分开不差毫厘，越大证明隔阂越深)
  */
 export function euclideanDistance(a: number[], b: number[]): number {
   if (a.length !== b.length) {
@@ -80,11 +79,11 @@ export function euclideanDistance(a: number[], b: number[]): number {
 }
 
 /**
- * Compute the dot product of two vectors.
+ * 算出两个多维度空间内的特征方向向量的点乘 (Dot Product)。
  *
- * @param a - First vector
- * @param b - Second vector
- * @returns Scalar dot product
+ * @param a - A向特征量
+ * @param b - B向特征量
+ * @returns 数字标量值
  */
 export function dotProduct(a: number[], b: number[]): number {
   if (a.length !== b.length) {
@@ -102,10 +101,10 @@ export function dotProduct(a: number[], b: number[]): number {
 }
 
 /**
- * Normalize a vector to unit length (L2 normalization).
+ * 将传如的向量量级进行所谓的 L2 范式单位标准化(L2 Normalization)。
  *
- * @param v - Input vector
- * @returns New vector with ||v|| = 1
+ * @param v - 获取带长短幅度的特征量
+ * @returns 指针相同但量级全归 1 的新兵向量
  */
 export function normalize(v: number[]): number[] {
   let norm = 0;

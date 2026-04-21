@@ -1,15 +1,15 @@
 // ============================================================================
-// AI-Stream-Kit — Stream Markdown Renderer
+// AI-Stream-Kit — 流式 Markdown 增量渲染器 (Stream Markdown Renderer)
 // ============================================================================
-// Combines auto-close algorithm with an optional Markdown engine to
-// produce safe, renderable HTML from a partial Markdown stream.
+// 负责把 auto-close(防缺失算法) 强行修复后的文本，对接送进选配的外部 Markdown 编译引擎。
+// 它可以安全又丝滑地吐出经过合法转化的 HTML 语言文本代码。
 // ============================================================================
 
 import type { StreamRendererOptions } from '../core/types.js';
 import { autoClose } from './auto-close.js';
 
 /**
- * Streaming Markdown renderer that handles partial/unclosed Markdown.
+ * 流式 Markdown 渲染控制器（用于托管解决所有残缺 Markdown 的安全接引与代传）。
  *
  * @example
  * ```ts
@@ -22,18 +22,18 @@ import { autoClose } from './auto-close.js';
  *
  * sseClient.onMessage = (event) => {
  *   renderer.append(JSON.parse(event.data).text);
- *   // Container is auto-updated with rendered HTML
+ *   // 挂了 container 参数它自然而然就会把你传进来的字符同步给画面容器了
  * };
  * ```
  */
 export class StreamMarkdownRenderer {
-  /** Accumulated raw Markdown text */
+  /** 深埋着累加储存的原滋原味 Markdown 底层字符串 */
   private accumulated: string = '';
 
-  /** Configuration */
+  /** 渲染器的核心定制属性面板 */
   private readonly options: StreamRendererOptions;
 
-  /** Cached last output to avoid redundant renders */
+  /** 本地缓存拦截，防止重复触发相同的废弃刷新事件 */
   private lastOutput: string = '';
 
   constructor(options: StreamRendererOptions = {}) {
@@ -41,10 +41,10 @@ export class StreamMarkdownRenderer {
   }
 
   /**
-   * Append a text chunk from the stream.
+   * 将一块全新收到的文本薄片添加到累加库的顶端里去。
    *
-   * @param chunk - The new text fragment to add
-   * @returns The current rendered output (HTML if converter provided, patched Markdown otherwise)
+   * @param chunk - 这个小残片将会缝进全文中段
+   * @returns 吐出目前被渲染成型的内容 (倘若提供了编译函数就是 HTML 代码，没有则只是缝满补丁的 Markdown 字句)
    */
   append(chunk: string): string {
     this.accumulated += chunk;
@@ -64,28 +64,28 @@ export class StreamMarkdownRenderer {
   }
 
   /**
-   * Get the current rendered output without appending new text.
+   * 按下暂定键仅仅获取下当前的渲染成果。
    */
   getHTML(): string {
     return this.render();
   }
 
   /**
-   * Get the raw accumulated Markdown (before auto-close).
+   * 获取内部未遭任何修饰及保底闭合补丁打过的粗糙原石 Markdown 内容。
    */
   getRawMarkdown(): string {
     return this.accumulated;
   }
 
   /**
-   * Get the patched Markdown (after auto-close).
+   * 获取历经闭合补丁修葺过的严实无缝的 Markdown 内容文本素材。
    */
   getPatchedMarkdown(): string {
     return autoClose(this.accumulated);
   }
 
   /**
-   * Replace the entire accumulated content.
+   * 执行霸道式直接替换掉所有长途跋涉积累的内容文本，强硬注入你想要的全文。
    */
   setContent(content: string): string {
     this.accumulated = content;
@@ -100,7 +100,7 @@ export class StreamMarkdownRenderer {
   }
 
   /**
-   * Reset all state.
+   * 粉碎重启全部内部暂存与 DOM 靶向指向区的内部字符信息，回到白纸状态。
    */
   reset(): void {
     this.accumulated = '';
@@ -112,16 +112,16 @@ export class StreamMarkdownRenderer {
   }
 
   /**
-   * Get the current text length (useful for progress tracking).
+   * 获取当下的原本文档堆叠字符字数容量。
    */
   get length(): number {
     return this.accumulated.length;
   }
 
   /**
-   * Internal render pipeline:
-   * 1. Auto-close unclosed tags
-   * 2. Convert to HTML if converter is provided
+   * 隐藏流水控制系统流程：
+   * 1. 使用 auto-close 将所有漏风的开口挂件填补死
+   * 2. 如果存在转化机器，直接输出漂亮的网页 HTML 标记码
    */
   private render(): string {
     const patched = autoClose(this.accumulated);
@@ -134,7 +134,7 @@ export class StreamMarkdownRenderer {
   }
 
   /**
-   * Scroll the container to the bottom.
+   * 使用霸道且最暴力简单的算法帮助滚轴一路滚到底端深渊（实现全自动页面尾随的效果）。
    */
   private scrollToBottom(): void {
     const container = this.options.container;

@@ -1,7 +1,8 @@
 // ============================================================================
-// AI-Stream-Kit — Vue Adapter
+// AI-Stream-Kit — Vue 适配器 (Vue Adapter)
 // ============================================================================
-// Provides a `useAIStream` Vue Composable for seamless integration.
+// 提供了一个 `useAIStream` Vue Composable 函数，用于在 Vue 中无缝集成流式 AI 聊天响应。
+// 它可以自动响应式地管理流的生命周期、进行 Markdown 渲染以及处理连接断开释放。
 // ============================================================================
 
 import { ref, onUnmounted, type Ref } from 'vue';
@@ -16,37 +17,48 @@ import type {
 } from '../core/types.js';
 
 /**
- * Options for the useAIStream composable.
+ * useAIStream 组合式函数(Composable)的配置选项。
  */
 export interface UseAIStreamOptions {
-  /** SSE client configuration */
+  /** SSE 客户端配置 (包含 url, method, 等) */
   sseOptions: Omit<SSEClientOptions, 'onMessage' | 'onError' | 'onOpen' | 'onClose' | 'signal'>;
-  /** Markdown renderer configuration */
+  /** Markdown 渲染器配置选项 */
   rendererOptions?: StreamRendererOptions;
-  /** Extract text from SSE event (default: parse JSON and get .text/.content) */
+  /** 
+   * 从 SSE 事件中提取解析文本的回调。
+   * (默认: 尝试解析 JSON 并获取 .text, .content 或者 .delta.content 字段) 
+   */
   extractText?: (event: SSEEvent) => string | null;
-  /** Callback when stream completes */
+  /** 流接收完成并渲染结束时的回调函数，含完整的纯文本 */
   onComplete?: (fullText: string) => void;
-  /** Callback on error */
+  /** 捕获错误的回调函数 */
   onError?: (error: Error) => void;
 }
 
 /**
- * Return value of the useAIStream composable.
+ * useAIStream 组合式函数的返回值。
  */
 export interface UseAIStreamReturn {
+  /** 经过 Markdown 渲染及标签自动闭合修复后的最终 HTML */
   html: Ref<string>;
+  /** SSE 读取到的未闭合/原始 Markdown 数据 */
   rawText: Ref<string>;
+  /** 是否当前正处于接收数据流状态中 */
   isStreaming: Ref<boolean>;
+  /** 连接状态 ('idle' | 'connected' | 'closed') */
   connectionState: Ref<SSEConnectionState>;
+  /** SSE 或渲染时产生的报错信息 */
   error: Ref<Error | null>;
+  /** 开始流式请求，可传入或覆盖请求体的 Body */
   start: (body?: string | Record<string, unknown>) => void;
+  /** 手动立刻中断流式请求 */
   stop: () => void;
+  /** 中断数据流并将积累的数据与状态还原清空 */
   reset: () => void;
 }
 
 /**
- * Default text extractor.
+ * 默认提取器，尝试兼容 OpenAI 及常规平台的 API 响应报文格式
  */
 function defaultExtractText(event: SSEEvent): string | null {
   if (event.data === '[DONE]') return null;
@@ -65,7 +77,7 @@ function defaultExtractText(event: SSEEvent): string | null {
 }
 
 /**
- * Vue Composable for AI streaming with built-in Markdown rendering.
+ * 带有内建 Markdown 渲染管线的 Vue Composable (AI流数据接收Hook)。
  *
  * @example
  * ```vue
@@ -101,7 +113,7 @@ export function useAIStream(options: UseAIStreamOptions): UseAIStreamReturn {
   const extractText = options.extractText ?? defaultExtractText;
 
   function start(body?: string | Record<string, unknown>): void {
-    // Clean up previous
+    // 如果上次请求还在进行中，先终止它
     if (abortController) {
       abortController.abort();
     }
@@ -155,7 +167,7 @@ export function useAIStream(options: UseAIStreamOptions): UseAIStreamReturn {
     connectionState.value = 'idle';
   }
 
-  // Cleanup on component unmount
+  // 当组件被卸载时，自动终止请求以释放内存并阻断网络开销
   onUnmounted(() => {
     abortController?.abort();
     client?.close();

@@ -1,16 +1,15 @@
 // ============================================================================
-// AI-Stream-Kit — Text Chunker for RAG
+// AI-Stream-Kit — RAG 文本切片分块器 (Text Chunker for RAG)
 // ============================================================================
-// Splits documents into overlapping chunks for embedding generation.
-// Uses a hierarchical separator strategy: tries to split at natural
-// boundaries (paragraphs > sentences > words) before falling back
-// to character-level splitting.
+// 用以将超长篇幅文本切割成包含重叠字数的碎块，以便喂给嵌入模型。
+// 采用降级策略机制执行：尽可能选择保留人类语言语境边界（先找段落 > 再找整句 > 再找词汇），
+// 在万不得已找不到天然截断点时才会降级触发等长字幅粗暴截断机制。
 // ============================================================================
 
 import type { ChunkOptions } from '../core/types.js';
 
 /**
- * Default chunking options.
+ * 默认推崇的分块首选配置项。
  */
 export const DEFAULT_CHUNK_OPTIONS: ChunkOptions = {
   chunkSize: 500,
@@ -19,16 +18,16 @@ export const DEFAULT_CHUNK_OPTIONS: ChunkOptions = {
 };
 
 /**
- * Split text into overlapping chunks suitable for embedding generation.
+ * 对长文本进行妥善地智能分块，并自带承上启下的重叠率字数。
  *
- * @param text - The input text to split
- * @param options - Chunking configuration (partial, merged with defaults)
- * @returns Array of text chunks
+ * @param text - 等待切割开来的整段文本
+ * @param options - 允许用户覆盖重写切割逻辑的配置项
+ * @returns 已经被切得适合喂饭给模型的小数组块了
  *
  * @example
  * ```ts
  * const chunks = chunkText(longDocument, { chunkSize: 500, overlap: 50 });
- * // => ['First 500 chars...', '...overlapping 50 chars + next 450...', ...]
+ * // => ['前500个单词...', '...包含重叠的50个词 + 向后推延450字符的段落...', ...]
  * ```
  */
 export function chunkText(
@@ -53,7 +52,7 @@ export function chunkText(
 }
 
 /**
- * Recursively split text by trying separators in priority order.
+ * 遵循不同界限标号层级而依次迭代下放的拆分法宝。
  */
 function recursiveSplit(
   text: string,
@@ -81,7 +80,7 @@ function recursiveSplit(
 }
 
 /**
- * Merge split segments into chunks that respect the size limit.
+ * 将打散重组后的短文本根据体积大小限制来合并粘贴成合格完整的输出 Chunk 块。
  */
 function mergeSplitsIntoChunks(
   splits: string[],
@@ -132,7 +131,7 @@ function mergeSplitsIntoChunks(
 }
 
 /**
- * Character-level splitting as a last resort.
+ * 迫不得已降级启动的最简单的按纯纯长短字符一刀切的兜底分裂法。
  */
 function characterSplit(
   text: string,
