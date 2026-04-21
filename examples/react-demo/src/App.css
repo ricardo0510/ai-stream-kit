@@ -1,0 +1,266 @@
+.app-container {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #fff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 12px rgba(165, 180, 252, 0.3));
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #94a3b8;
+  margin-bottom: 3rem;
+  font-weight: 300;
+}
+
+.hero-subtitle code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-family: monospace;
+  color: #c7d2fe;
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 8px 20px rgba(99, 102, 241, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.5s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 12px 28px rgba(99, 102, 241, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.action-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.action-btn:disabled {
+  background: #334155;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: scale(0.98);
+}
+
+/* Glassmorphic Markdown Output Console */
+.terminal-window {
+  margin-top: 3rem;
+  text-align: left;
+  background: rgba(20, 21, 31, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.terminal-header {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mac-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.mac-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.mac-btn.close {
+  background-color: #ff5f56;
+  box-shadow: 0 0 8px rgba(255, 95, 86, 0.4);
+}
+.mac-btn.minimize {
+  background-color: #ffbd2e;
+  box-shadow: 0 0 8px rgba(255, 189, 46, 0.4);
+}
+.mac-btn.maximize {
+  background-color: #27c93f;
+  box-shadow: 0 0 8px rgba(39, 201, 63, 0.4);
+}
+
+.terminal-title {
+  margin-left: 16px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.markdown-body {
+  padding: 2rem 2.5rem;
+  height: 500px;
+  width: 900px;
+  overflow-y: auto;
+  color: #cbd5e1;
+  line-height: 1.8;
+}
+
+/* Custom Scrollbar for Markdown Body */
+.markdown-body::-webkit-scrollbar {
+  width: 8px;
+}
+.markdown-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.markdown-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.markdown-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Specific Markdown Elements Styling */
+.markdown-body h1 {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.markdown-body h2 {
+  font-size: 1.75rem;
+  color: #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+  margin-top: 2rem;
+}
+
+.markdown-body p {
+  margin-bottom: 1.25rem;
+}
+
+.markdown-body strong {
+  color: #f8fafc;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.markdown-body code {
+  font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.markdown-body pre {
+  background: #0f111a !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.25rem !important;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+  border: none;
+  color: #e2e8f0;
+  font-size: 0.95em;
+}
+
+.markdown-body ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.markdown-body li::marker {
+  color: #818cf8;
+}
+
+/* Pulsing effect while streaming */
+.streaming-active {
+  box-shadow:
+    0 25px 50px -12px rgba(99, 102, 241, 0.15),
+    0 0 0 1px rgba(99, 102, 241, 0.3) inset,
+    0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.2em;
+  background-color: #818cf8;
+  vertical-align: middle;
+  margin-left: 4px;
+  animation: blink 1s step-end infinite;
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.8);
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

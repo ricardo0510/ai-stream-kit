@@ -1,0 +1,48 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx vitest run
+
+      - name: Build SDK
+        run: npm run build
+
+      - name: Check if version exists on npm
+        id: check_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          NAME=$(node -p "require('./package.json').name")
+          if npm view $NAME@$VERSION version > /dev/null 2>&1; then
+            echo "Version $VERSION already exists. Skipping publish."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $VERSION is new. Proceeding to publish."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to npm
+        if: steps.check_version.outputs.exists == 'false'
+        run: npm publish
+        env:
+          # 需要在 GitHub 项目的 Settings -> Secrets and variables -> Actions 中配置 NPM_TOKEN
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
